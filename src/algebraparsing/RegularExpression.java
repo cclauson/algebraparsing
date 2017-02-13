@@ -155,8 +155,6 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 
 	private static class ClosureRegularExpression<T> extends RegularExpression<T> {
 
-		private static final String STRREP = "[empty regexp]";
-
 		private final RegularExpression<T> child;
 		
 		public ClosureRegularExpression(RegularExpression<T> child) {
@@ -185,7 +183,7 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 		
 		@Override
 		public int hashCode() {
-			return STRREP.hashCode();
+			return child.hashCode();
 		}
 		
 	}
