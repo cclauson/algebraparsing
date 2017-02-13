@@ -169,6 +169,8 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 		
 		@Override
 		public String toString() {
+			if (child instanceof CatRegularExpression || child instanceof UnionRegularExpression)
+				return "(" + child.toString() + ")*";
 			return child.toString() + "*";
 		}
 		
