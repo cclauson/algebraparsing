@@ -29,7 +29,6 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 		return new ClosureRegularExpression<T>(this);
 	}
 
-	
 	private static class AtomRegularExpression<T> extends RegularExpression<T> {
 		private final T atom;
 
@@ -270,6 +269,58 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 			return this.rightChild.hashCode() * 313 ^ this.leftChild.hashCode();
 		}
 		
+	}
+	
+	private static class RegularExpressionReversal<T> extends RegularExpression<T> {
+
+		private final RegularExpression<T> childRegexp;
+		
+		public RegularExpressionReversal(RegularExpression<T> childRegexp) {
+			this.childRegexp = childRegexp;
+		}
+		
+		@Override
+		public RegularExpression<T> add(RegularExpression<T> re) {
+			if (re == null || !(re instanceof RegularExpressionReversal)) {
+				throw new RuntimeException("reversals can only interoperate with other reversals");
+			}
+			return new RegularExpressionReversal<T>(this.childRegexp.add(((RegularExpressionReversal<T>)re).childRegexp));
+		}
+		
+		@Override
+		public RegularExpression<T> mul(RegularExpression<T> re) {
+			if (re == null || !(re instanceof RegularExpressionReversal)) {
+				throw new RuntimeException("reversals can only interoperate with other reversals");
+			}
+			return new RegularExpressionReversal<T>(((RegularExpressionReversal<T>)re).childRegexp.mul(this.childRegexp));
+		}
+		
+		@Override
+		public RegularExpression<T> close() {
+			return new RegularExpressionReversal<T>(childRegexp.close());
+		}
+		
+		@Override
+		public String toString() {
+			return childRegexp.toString();
+		}
+		
+		@Override
+		public int hashCode() {
+			return childRegexp.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || !(other instanceof RegularExpressionReversal))
+				return false;
+			RegularExpressionReversal<?> rer = (RegularExpressionReversal<?>) other;
+			return this.childRegexp.equals(rer.childRegexp);
+		}
+	}
+	
+	public static <T> RegularExpression<T> reversal(RegularExpression<T> re) {
+		return new RegularExpressionReversal<T>(re);
 	}
 
 }

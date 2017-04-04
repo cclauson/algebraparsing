@@ -21,24 +21,24 @@ public class KleeneMatrix<T extends KleeneAlgebraElement<T>>
 		this.one = one;
 	}
 	
-	public KleeneMatrix(T[][] data, T zero, T one) {
+	public KleeneMatrix(List<List<T>> data, T zero, T one) {
 		if (data == null)
 			throw new IllegalArgumentException("data may not be null");
-		if (data.length == 0)
+		if (data.size() == 0)
 			throw new IllegalArgumentException("data must not be empty array");
-		this.m = data.length;
+		this.m = data.size();
 		final List<List<T>> dataCopy = new ArrayList<List<T>>(this.m);
-		if (data[0] == null)
+		if (data.get(0) == null)
 			throw new IllegalArgumentException("first member of data array is null");
-		this.n = data[0].length;
+		this.n = data.get(0).size();
 		if (n == 0)
 			throw new IllegalArgumentException("first member of data array is zero-length");
-		for (T[] arry : data) {
+		for (List<T> arry : data) {
 			if (arry == null)
 				throw new IllegalArgumentException("found null array in data");
-			if (arry.length != n)
+			if (arry.size() != n)
 				throw new IllegalArgumentException("array of arrays is not a rectangle");
-			dataCopy.add(new ArrayList<T>(Arrays.asList(arry)));
+			dataCopy.add(new ArrayList<T>(arry));
 		}
 		this.data = dataCopy;
 		if (zero == null)
@@ -68,12 +68,14 @@ public class KleeneMatrix<T extends KleeneAlgebraElement<T>>
 		if (this.n != el.m) {
 			throw new IllegalArgumentException("matrices are not compatible for multiplication");
 		}
-		return createInstance(m, n, new BiFunction<Integer, Integer, T>() {
+		return createInstance(m, el.n, new BiFunction<Integer, Integer, T>() {
 			@Override
 			public T apply(Integer i, Integer j) {
 				T acc = zero;
 				for (int k = 0; k < KleeneMatrix.this.n; ++k) {
-					acc = acc.add(KleeneMatrix.this.getAt(i, k).mul(el.getAt(k, j)));
+					T factor1 = KleeneMatrix.this.getAt(i, k);
+					T factor2 = el.getAt(k, j);
+					acc = acc.add(factor1.mul(factor2));
 				}
 				return acc;
 			}
@@ -210,6 +212,18 @@ public class KleeneMatrix<T extends KleeneAlgebraElement<T>>
 			sb.append("]\n");
 		}
 		return sb.toString();
+	}
+	
+	public <U extends KleeneAlgebraElement<U>> KleeneMatrix<U> projectionThroughMorphism(Function<T, U> morphism) {
+		final List<List<U>> mDat = new ArrayList<List<U>>();
+		for (List<T> rowSrc : this.data) {
+			List<U> rowDst = new ArrayList<U>();
+			for (T datSrc : rowSrc) {
+				rowDst.add(morphism.apply(datSrc));
+			}
+			mDat.add(rowDst);
+		}
+		return new KleeneMatrix<U>(mDat, morphism.apply(this.zero), morphism.apply(this.one));
 	}
 	
 }
