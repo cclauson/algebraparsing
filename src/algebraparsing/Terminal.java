@@ -1,25 +1,31 @@
 package algebraparsing;
 
 public class Terminal implements TerminalOrNonterminal {
-	private final char c;
+	
+	private final String s;
+	
 	public Terminal(char c) {
-		this.c = c;
+		this.s = Character.toString(c);
+	}
+	
+	public Terminal(String s) {
+		this.s = s;
 	}
 	
 	@Override
 	public String toString() {
-		return "'" + c + "'";
+		return "'" + s + "'";
 	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) return false;
 		if (!(other instanceof Terminal)) return false;
-		return this.c == ((Terminal)other).c;
+		return this.s.equals(((Terminal)other).s);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Character.hashCode(c);
+		return s.hashCode();
 	}
 }

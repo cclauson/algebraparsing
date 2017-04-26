@@ -70,10 +70,108 @@ public class TestMain {
 		
 		return new Grammar(startSymbol, Arrays.asList(p1, p2, p3, p4, p5));		
 	}
+	
+	private static Grammar logicExpression() {
+		//For the grammar:
+		// A -> B '$'
+		// B -> 'for all' H B
+		// B -> 'exists' H 'such that' B
+		// B -> C
+		// C -> C iff D
+		// C -> D
+		// D -> 'if' E 'then' D
+		// D -> E 'implies' D
+		// D -> E
+		// E -> E 'or' F
+		// E -> F
+		// F -> F 'and' G
+		// F -> G
+		// G -> not G
+		// G -> H
+		// G -> '(' B ')'
+		// H -> 'sym'
+		
+		Nonterminal startSymbol = new Nonterminal('A');
+		// A -> B '$'
+		List<Production> productions = Arrays.asList(
+			new Production(new Nonterminal('A'), Arrays.asList(
+				new Nonterminal('B'), new Terminal('$')
+			)),
+			// B -> 'for all' H B
+			new Production(new Nonterminal('B'), Arrays.asList(
+				new Terminal("for all"), new Nonterminal('H'), new Nonterminal('B')
+			)),
+			// B -> 'exists' H 'such that' B
+			new Production(new Nonterminal('B'), Arrays.asList(
+				new Terminal("exists"), new Nonterminal('H'),
+				new Terminal("such that"), new Nonterminal('B')
+			)),
+			// B -> C
+			new Production(new Nonterminal('B'), Arrays.asList(
+				new Nonterminal('C')
+			)),
+			// C -> C iff D
+			new Production(new Nonterminal('C'), Arrays.asList(
+				new Nonterminal('C'), new Terminal("iff"), new Nonterminal('D')
+			)),
+			// C -> D
+			new Production(new Nonterminal('C'), Arrays.asList(
+				new Nonterminal('D')
+			)),
+			// D -> 'if' E 'then' D
+			new Production(new Nonterminal('D'), Arrays.asList(
+				new Terminal("if"), new Nonterminal('E'),
+				new Terminal("then"), new Nonterminal('D')
+			)),
+			// D -> E 'implies' D
+			new Production(new Nonterminal('D'), Arrays.asList(
+				new Nonterminal('E'), new Terminal("implies"), new Nonterminal('D')
+			)),
+			// D -> E
+			new Production(new Nonterminal('D'), Arrays.asList(
+				new Nonterminal('E')
+			)),
+			// E -> E 'or' F
+			new Production(new Nonterminal('E'), Arrays.asList(
+					new Nonterminal('E'), new Terminal("or"), new Nonterminal('F')
+			)),
+			// E -> F
+			new Production(new Nonterminal('E'), Arrays.asList(
+				new Nonterminal('F')
+			)),
+			// F -> F 'and' G
+			new Production(new Nonterminal('F'), Arrays.asList(
+				new Nonterminal('F'), new Terminal("and"), new Nonterminal('G')
+			)),
+			// F -> G
+			new Production(new Nonterminal('F'), Arrays.asList(
+				new Nonterminal('G')
+			)),
+			// G -> not G
+			new Production(new Nonterminal('G'), Arrays.asList(
+				new Terminal("not"), new Nonterminal('G')
+			)),
+			// G -> H
+			new Production(new Nonterminal('G'), Arrays.asList(
+				new Nonterminal('H')
+			)),
+			// G -> '(' B ')'
+			new Production(new Nonterminal('G'), Arrays.asList(
+				new Terminal("("), new Nonterminal('B'), new Terminal(")")
+			)),
+			// H -> 'sym'
+			new Production(new Nonterminal('H'), Arrays.asList(
+				new Terminal("sym")
+			))
+		);
+		
+		return new Grammar(startSymbol, productions);		
+	}
 
 	public static void main(String[] args) {
 		
-		Grammar grammar = grammar2();
+		//Grammar grammar = grammar2();
+		Grammar grammar = logicExpression();
 		System.out.println(grammar.toString());
 		
 		System.out.println();
