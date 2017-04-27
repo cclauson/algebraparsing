@@ -92,8 +92,8 @@ public class TestMain {
 		// H -> 'sym'
 		
 		Nonterminal startSymbol = new Nonterminal('A');
-		// A -> B '$'
 		List<Production> productions = Arrays.asList(
+			// A -> B '$'
 			new Production(new Nonterminal('A'), Arrays.asList(
 				new Nonterminal('B'), new Terminal('$')
 			)),
