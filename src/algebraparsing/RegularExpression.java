@@ -2,8 +2,6 @@ package algebraparsing;
 
 import java.util.*;
 
-import javax.naming.OperationNotSupportedException;
-
 public abstract class RegularExpression<T> implements KleeneAlgebraElement<RegularExpression<T>> {
 
 	private RegularExpression() {}
@@ -34,6 +32,7 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 	}
 
 	public abstract DecomposedRegexp<T> decompose();
+	
 	
 	private static class AtomRegularExpression<T> extends RegularExpression<T> {
 		private final T atom;
@@ -361,7 +360,6 @@ public abstract class RegularExpression<T> implements KleeneAlgebraElement<Regul
 					leftChildDecomposed.hasEmptyString() || rightChildDecomposed.hasEmptyString();
 			return new DecomposedRegexp<T>(terms, hasEmptyString);
 		}
-		
 	}
 	
 	//kind of a hack, at least for now, would probably have to be improved to be solid

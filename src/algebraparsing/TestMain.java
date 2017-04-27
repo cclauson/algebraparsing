@@ -182,41 +182,6 @@ public class TestMain {
 		System.out.println(mvg.vector);
 		
 		System.out.println();
-				
-		/*
-		List<List<RegularExpression<TerminalOrNonterminal>>> mDat = new ArrayList<List<RegularExpression<TerminalOrNonterminal>>>();
-		List<RegularExpression<TerminalOrNonterminal>> row1 = new ArrayList<RegularExpression<TerminalOrNonterminal>>();
-		List<RegularExpression<TerminalOrNonterminal>> row2 = new ArrayList<RegularExpression<TerminalOrNonterminal>>();
-		List<RegularExpression<TerminalOrNonterminal>> row3 = new ArrayList<RegularExpression<TerminalOrNonterminal>>();
-
-		row1.add(emptyRegexp()); row1.add(fromAtom(new Terminal('$'))); row1.add(emptyRegexp());
-
-		row2.add(emptyRegexp());
-		row2.add(fromAtom((TerminalOrNonterminal)new Terminal('+'))
-				.mul(fromAtom(new Nonterminal('T'))));
-		row2.add(emptyString());
-
-		row3.add(emptyRegexp()); row3.add(emptyRegexp()); row3.add(emptyRegexp());
-		
-		//row1.add(emptyRegexp()); row1.add(emptyString()); row1.add(emptyRegexp());
-		//row2.add(emptyRegexp()); row2.add(emptyRegexp()); row2.add(emptyString());
-		//row3.add(emptyRegexp()); row3.add(emptyRegexp()); row3.add(emptyRegexp());
-
-		mDat.add(row1);
-		mDat.add(row2);
-		mDat.add(row3);
-
-		for (List<RegularExpression<TerminalOrNonterminal>> dat : mDat) {
-			for (int i = 0; i < dat.size(); ++i) {
-				dat.set(i, RegularExpression.reversal(dat.get(i)));
-			}
-		}
-		
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> m = new KleeneMatrix<RegularExpression<TerminalOrNonterminal>>(
-				mDat,
-				RegularExpression.reversal(RegularExpression.emptyRegexp()),
-				RegularExpression.reversal(RegularExpression.emptyString()));
-		*/
 		
 		Function<RegularExpression<TerminalOrNonterminal>, RegularExpression<TerminalOrNonterminal>> reversal =
 				new Function<RegularExpression<TerminalOrNonterminal>, RegularExpression<TerminalOrNonterminal>>() {
@@ -231,42 +196,6 @@ public class TestMain {
 		
 		System.out.println(m);
 		System.out.println(m.close());
-		
-		/*
-		List<List<RegularExpression<TerminalOrNonterminal>>> vectorDat = new ArrayList<List<RegularExpression<TerminalOrNonterminal>>>();
-		List<RegularExpression<TerminalOrNonterminal>> vecrow1 = new ArrayList<RegularExpression<TerminalOrNonterminal>>();
-		List<RegularExpression<TerminalOrNonterminal>> vecrow2 = new ArrayList<RegularExpression<TerminalOrNonterminal>>();
-		List<RegularExpression<TerminalOrNonterminal>> vecrow3 = new ArrayList<RegularExpression<TerminalOrNonterminal>>();
-
-		//vecrow1.add(RegularExpression.fromAtom((TerminalOrNonterminal)new Terminal('x')).mul(RegularExpression.fromAtom((TerminalOrNonterminal)new Terminal('b'))));
-		//vecrow2.add(RegularExpression.fromAtom((TerminalOrNonterminal)new Terminal('a'))
-		//		.mul(RegularExpression.fromAtom(new Nonterminal('A')))
-		//		.mul(RegularExpression.fromAtom(new Terminal('b'))));
-		//vecrow3.add(RegularExpression.fromAtom((TerminalOrNonterminal)new Terminal('x')));
-
-		vecrow1.add(RegularExpression.emptyRegexp());
-		vecrow2.add(RegularExpression.emptyRegexp());
-		vecrow3.add(
-				RegularExpression.fromAtom((TerminalOrNonterminal)new Terminal('('))
-				.mul(RegularExpression.fromAtom(new Nonterminal('E')))
-				.mul(RegularExpression.fromAtom(new Terminal(')')))
-				.add(RegularExpression.fromAtom(new Terminal('i'))));
-		
-		vectorDat.add(vecrow1);
-		vectorDat.add(vecrow2);
-		vectorDat.add(vecrow3);
-
-		for (List<RegularExpression<TerminalOrNonterminal>> dat : vectorDat) {
-			for (int i = 0; i < dat.size(); ++i) {
-				dat.set(i, RegularExpression.reversal(dat.get(i)));
-			}
-		}
-		
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> vec = new KleeneMatrix<RegularExpression<TerminalOrNonterminal>>(
-				vectorDat,
-				RegularExpression.reversal(RegularExpression.emptyRegexp()),
-				RegularExpression.reversal(RegularExpression.emptyString()));
-		*/
 		
 		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> vec = mvg.vector.projectionThroughMorphism(reversal);
 
