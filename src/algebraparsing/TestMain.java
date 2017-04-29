@@ -79,7 +79,7 @@ public class TestMain {
 		// B -> C
 		// C -> C iff D
 		// C -> D
-		// D -> 'if' E 'then' D
+		// D -> 'if' B 'then' D
 		// D -> E 'implies' D
 		// D -> E
 		// E -> E 'or' F
@@ -118,9 +118,9 @@ public class TestMain {
 			new Production(new Nonterminal('C'), Arrays.asList(
 				new Nonterminal('D')
 			)),
-			// D -> 'if' E 'then' D
+			// D -> 'if' B 'then' D
 			new Production(new Nonterminal('D'), Arrays.asList(
-				new Terminal("if"), new Nonterminal('E'),
+				new Terminal("if"), new Nonterminal('B'),
 				new Terminal("then"), new Nonterminal('D')
 			)),
 			// D -> E 'implies' D
