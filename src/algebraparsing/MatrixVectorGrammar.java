@@ -2,15 +2,15 @@ package algebraparsing;
 
 import java.util.Map;
 
-public class MatrixVectorGrammar {
+public class MatrixVectorGrammar<T> {
 	public final Map<Nonterminal, Integer> nonterminalIndexMap;
-	public final KleeneMatrix<RegularExpression<TerminalOrNonterminal>> matrix;
-	public final KleeneMatrix<RegularExpression<TerminalOrNonterminal>> vector;
+	public final KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> matrix;
+	public final KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> vector;
 	
 	public MatrixVectorGrammar(
 		Map<Nonterminal, Integer> nonterminalIndexMap,
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> matrix,
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> vector
+		KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> matrix,
+		KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> vector
 	) {
 		this.nonterminalIndexMap = nonterminalIndexMap;
 		this.matrix = matrix;

@@ -7,11 +7,11 @@ import java.util.List;
  * 
  * @author C. Clauson
  */
-public class Production {
+public class Production<T> {
 	public Nonterminal nonterminal;
-	public List<TerminalOrNonterminal> rhs;
+	public List<TerminalOrNonterminal<T>> rhs;
 	
-	public Production(Nonterminal nonterminal, List<TerminalOrNonterminal> rhs) {
+	public Production(Nonterminal nonterminal, List<TerminalOrNonterminal<T>> rhs) {
 		if (nonterminal == null)
 			throw new IllegalArgumentException("nonterminal must not be null");
 		//let's require at least some list be passed, even though it could be empty
@@ -25,7 +25,7 @@ public class Production {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (TerminalOrNonterminal ton : rhs) {
+		for (TerminalOrNonterminal<T> ton : rhs) {
 			sb.append(ton.toString());
 		}
 		return nonterminal.toString() + " -> " + sb.toString();

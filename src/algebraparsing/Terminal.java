@@ -1,6 +1,6 @@
 package algebraparsing;
 
-public class Terminal implements TerminalOrNonterminal {
+public class Terminal {
 	
 	private final String s;
 	

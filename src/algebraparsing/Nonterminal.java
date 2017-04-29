@@ -1,6 +1,6 @@
 package algebraparsing;
 
-public class Nonterminal implements TerminalOrNonterminal {
+public class Nonterminal {
 	private final char c;
 	public Nonterminal(char c) {
 		this.c = c;

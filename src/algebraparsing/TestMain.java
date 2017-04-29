@@ -3,9 +3,41 @@ package algebraparsing;
 import java.util.*;
 import java.util.function.Function;
 
+import algebraparsing.Grammar.TerminalConsolidator;
+
 public class TestMain {
 
-	private static Grammar grammar1() {
+	private static final TerminalConsolidator<Terminal, Terminal> TC = new TerminalConsolidator<Terminal, Terminal>() {
+		
+		private RegularExpression<TerminalOrNonterminal<Terminal>> re = RegularExpression.emptyString();
+		
+		@Override
+		public void consolidateTerminal(Terminal terminal) {
+			re = re.mul(RegularExpression.fromAtom(TerminalOrNonterminal.fromTerminal(terminal)));
+		}
+
+		@Override
+		public RegularExpression<TerminalOrNonterminal<Terminal>> asRegexpAndReset() {
+			RegularExpression<TerminalOrNonterminal<Terminal>> ret = re;
+			re = RegularExpression.emptyString();
+			return ret;
+		}
+	};
+
+	
+	private static TerminalOrNonterminal<Terminal> nonterminal(char c) {
+		return TerminalOrNonterminal.fromNonterminal(new Nonterminal(c));
+	}
+
+	private static TerminalOrNonterminal<Terminal> terminal(char c) {
+		return TerminalOrNonterminal.fromTerminal(new Terminal(c));
+	}
+
+	private static TerminalOrNonterminal<Terminal> terminal(String s) {
+		return TerminalOrNonterminal.fromTerminal(new Terminal(s));
+	}
+
+	private static Grammar<Terminal, Terminal> grammar1() {
 		//For the grammar:
 		// Z -> E $
 		// E -> E '+' T
@@ -15,30 +47,30 @@ public class TestMain {
 		
 		Nonterminal startSymbol = new Nonterminal('Z');
 		// Z -> E $
-		Production p1 = new Production(new Nonterminal('Z'), Arrays.asList(
-			new Nonterminal('E'), new Terminal('$')
+		Production<Terminal> p1 = new Production<Terminal>(new Nonterminal('Z'), Arrays.asList(
+			nonterminal('E'), terminal('$')
 		));
 		// E -> E '+' T
-		Production p2 = new Production(new Nonterminal('E'), Arrays.asList(
-			new Nonterminal('E'), new Terminal('+'), new Nonterminal('T')
+		Production<Terminal> p2 = new Production<Terminal>(new Nonterminal('E'), Arrays.asList(
+			nonterminal('E'), terminal('+'), nonterminal('T')
 		));
 		// E -> T
-		Production p3 = new Production(new Nonterminal('E'), Arrays.asList(
-			new Nonterminal('T')
+		Production<Terminal> p3 = new Production<Terminal>(new Nonterminal('E'), Arrays.asList(
+			nonterminal('T')
 		));
 		// T -> '(' E ')'
-		Production p4 = new Production(new Nonterminal('T'), Arrays.asList(
-			new Terminal('('), new Nonterminal('E'), new Terminal(')')
+		Production<Terminal> p4 = new Production<Terminal>(new Nonterminal('T'), Arrays.asList(
+			terminal('('), nonterminal('E'), terminal(')')
 		));
 		// T -> 'i'
-		Production p5 = new Production(new Nonterminal('T'), Arrays.asList(
-			new Terminal('i')
+		Production<Terminal> p5 = new Production<Terminal>(new Nonterminal('T'), Arrays.asList(
+			terminal('i')
 		));
 		
-		return new Grammar(startSymbol, Arrays.asList(p1, p2, p3, p4, p5));		
+		return new Grammar<Terminal, Terminal>(startSymbol, Arrays.asList(p1, p2, p3, p4, p5), TC);		
 	}
 	
-	private static Grammar grammar2() {
+	private static Grammar<Terminal, Terminal> grammar2() {
 		//For the grammar:
 		// S -> A
 		// S -> 'x' 'b'
@@ -48,30 +80,30 @@ public class TestMain {
 		
 		Nonterminal startSymbol = new Nonterminal('S');
 		// S -> A
-		Production p1 = new Production(new Nonterminal('S'), Arrays.asList(
-			new Nonterminal('A')
+		Production<Terminal> p1 = new Production<Terminal>(new Nonterminal('S'), Arrays.asList(
+			nonterminal('A')
 		));
 		// S -> 'x' 'b'
-		Production p2 = new Production(new Nonterminal('S'), Arrays.asList(
-			new Terminal('x'), new Terminal('b')
+		Production<Terminal> p2 = new Production<Terminal>(new Nonterminal('S'), Arrays.asList(
+			terminal('x'), terminal('b')
 		));
 		// A -> 'a' A 'b'
-		Production p3 = new Production(new Nonterminal('A'), Arrays.asList(
-			new Terminal('a'), new Nonterminal('A'), new Terminal('b')
+		Production<Terminal> p3 = new Production<Terminal>(new Nonterminal('A'), Arrays.asList(
+			terminal('a'), nonterminal('A'), terminal('b')
 		));
 		// A -> B
-		Production p4 = new Production(new Nonterminal('A'), Arrays.asList(
-			new Nonterminal('B')
+		Production<Terminal> p4 = new Production<Terminal>(new Nonterminal('A'), Arrays.asList(
+			nonterminal('B')
 		));
 		// B -> 'x'
-		Production p5 = new Production(new Nonterminal('B'), Arrays.asList(
-			new Terminal('x')
+		Production<Terminal> p5 = new Production<Terminal>(new Nonterminal('B'), Arrays.asList(
+			terminal('x')
 		));
 		
-		return new Grammar(startSymbol, Arrays.asList(p1, p2, p3, p4, p5));		
+		return new Grammar<Terminal, Terminal>(startSymbol, Arrays.asList(p1, p2, p3, p4, p5), TC);		
 	}
 	
-	private static Grammar logicExpression() {
+	private static Grammar<Terminal, Terminal> logicExpression() {
 		//For the grammar:
 		// A -> B '$'
 		// B -> 'for all' H B
@@ -92,112 +124,144 @@ public class TestMain {
 		// H -> 'sym'
 		
 		Nonterminal startSymbol = new Nonterminal('A');
-		List<Production> productions = Arrays.asList(
-			// A -> B '$'
-			new Production(new Nonterminal('A'), Arrays.asList(
-				new Nonterminal('B'), new Terminal('$')
-			)),
-			// B -> 'for all' H B
-			new Production(new Nonterminal('B'), Arrays.asList(
-				new Terminal("for all"), new Nonterminal('H'), new Nonterminal('B')
-			)),
-			// B -> 'exists' H 'such that' B
-			new Production(new Nonterminal('B'), Arrays.asList(
-				new Terminal("exists"), new Nonterminal('H'),
-				new Terminal("such that"), new Nonterminal('B')
-			)),
-			// B -> C
-			new Production(new Nonterminal('B'), Arrays.asList(
-				new Nonterminal('C')
-			)),
-			// C -> C iff D
-			new Production(new Nonterminal('C'), Arrays.asList(
-				new Nonterminal('C'), new Terminal("iff"), new Nonterminal('D')
-			)),
-			// C -> D
-			new Production(new Nonterminal('C'), Arrays.asList(
-				new Nonterminal('D')
-			)),
-			// D -> 'if' B 'then' D
-			new Production(new Nonterminal('D'), Arrays.asList(
-				new Terminal("if"), new Nonterminal('B'),
-				new Terminal("then"), new Nonterminal('D')
-			)),
-			// D -> E 'implies' D
-			new Production(new Nonterminal('D'), Arrays.asList(
-				new Nonterminal('E'), new Terminal("implies"), new Nonterminal('D')
-			)),
-			// D -> E
-			new Production(new Nonterminal('D'), Arrays.asList(
-				new Nonterminal('E')
-			)),
-			// E -> E 'or' F
-			new Production(new Nonterminal('E'), Arrays.asList(
-					new Nonterminal('E'), new Terminal("or"), new Nonterminal('F')
-			)),
-			// E -> F
-			new Production(new Nonterminal('E'), Arrays.asList(
-				new Nonterminal('F')
-			)),
-			// F -> F 'and' G
-			new Production(new Nonterminal('F'), Arrays.asList(
-				new Nonterminal('F'), new Terminal("and"), new Nonterminal('G')
-			)),
-			// F -> G
-			new Production(new Nonterminal('F'), Arrays.asList(
-				new Nonterminal('G')
-			)),
-			// G -> not G
-			new Production(new Nonterminal('G'), Arrays.asList(
-				new Terminal("not"), new Nonterminal('G')
-			)),
-			// G -> H
-			new Production(new Nonterminal('G'), Arrays.asList(
-				new Nonterminal('H')
-			)),
-			// G -> '(' B ')'
-			new Production(new Nonterminal('G'), Arrays.asList(
-				new Terminal("("), new Nonterminal('B'), new Terminal(")")
-			)),
-			// H -> 'sym'
-			new Production(new Nonterminal('H'), Arrays.asList(
-				new Terminal("sym")
+		List<Production<Terminal>> productions = new ArrayList<Production<Terminal>>();
+		// A -> B '$'
+		productions.add(
+			new Production<Terminal>(new Nonterminal('A'), Arrays.asList(
+				nonterminal('B'), terminal('$')
 			))
 		);
-		
-		return new Grammar(startSymbol, productions);		
+		// B -> 'for all' H B
+		productions.add(
+			new Production<Terminal>(new Nonterminal('B'), Arrays.asList(
+				terminal("for all"), nonterminal('H'), nonterminal('B')
+			))
+		);
+		// B -> 'exists' H 'such that' B
+		productions.add(
+			new Production<Terminal>(new Nonterminal('B'), Arrays.asList(
+				terminal("exists"), nonterminal('H'),
+				terminal("such that"), nonterminal('B')
+			))
+		);
+		// B -> C
+		productions.add(
+			new Production<Terminal>(new Nonterminal('B'), Arrays.asList(
+				nonterminal('C')
+			))
+		);
+		// C -> C iff D
+		productions.add(
+			new Production<Terminal>(new Nonterminal('C'), Arrays.asList(
+				nonterminal('C'), terminal("iff"), nonterminal('D')
+			))
+		);
+		// C -> D
+		productions.add(
+			new Production<Terminal>(new Nonterminal('C'), Arrays.asList(
+				nonterminal('D')
+			))
+		);
+			// D -> 'if' B 'then' D
+		productions.add(
+			new Production<Terminal>(new Nonterminal('D'), Arrays.asList(
+				terminal("if"), nonterminal('B'),
+				terminal("then"), nonterminal('D')
+			))
+		);
+		// D -> E 'implies' D
+		productions.add(
+			new Production<Terminal>(new Nonterminal('D'), Arrays.asList(
+				nonterminal('E'), terminal("implies"), nonterminal('D')
+			))
+		);
+		// D -> E
+		productions.add(
+			new Production<Terminal>(new Nonterminal('D'), Arrays.asList(
+				nonterminal('E')
+			))
+		);
+		// E -> E 'or' F
+		productions.add(
+			new Production<Terminal>(new Nonterminal('E'), Arrays.asList(
+				nonterminal('E'), terminal("or"), nonterminal('F')
+			))
+		);
+		// E -> F
+		productions.add(
+			new Production<Terminal>(new Nonterminal('E'), Arrays.asList(
+				nonterminal('F')
+			))
+		);
+		// F -> F 'and' G
+		productions.add(
+			new Production<Terminal>(new Nonterminal('F'), Arrays.asList(
+				nonterminal('F'), terminal("and"), nonterminal('G')
+			))
+		);
+		// F -> G
+		productions.add(
+			new Production<Terminal>(new Nonterminal('F'), Arrays.asList(
+				nonterminal('G')
+			))
+		);
+		// G -> not G
+		productions.add(
+			new Production<Terminal>(new Nonterminal('G'), Arrays.asList(
+				terminal("not"), nonterminal('G')
+			))
+		);
+		// G -> H
+		productions.add(
+			new Production<Terminal>(new Nonterminal('G'), Arrays.asList(
+				nonterminal('H')
+			))
+		);
+		// G -> '(' B ')'
+		productions.add(
+			new Production<Terminal>(new Nonterminal('G'), Arrays.asList(
+				terminal("("), nonterminal('B'), terminal(")")
+			))
+		);
+		// H -> 'sym'
+		productions.add(
+			new Production<Terminal>(new Nonterminal('H'), Arrays.asList(
+				terminal("sym")
+			))
+		);
+		return new Grammar<Terminal, Terminal>(startSymbol, productions, TC);		
 	}
 
 	public static void main(String[] args) {
 		
 		//Grammar grammar = grammar2();
-		Grammar grammar = logicExpression();
+		Grammar<Terminal, Terminal> grammar = logicExpression();
 		System.out.println(grammar.toString());
 		
 		System.out.println();
 		
-		MatrixVectorGrammar mvg = grammar.asAffineEndomorphism();
+		MatrixVectorGrammar<Terminal> mvg = grammar.asAffineEndomorphism();
 		System.out.println(mvg.matrix);
 		System.out.println();
 		System.out.println(mvg.vector);
 		
 		System.out.println();
 		
-		Function<RegularExpression<TerminalOrNonterminal>, RegularExpression<TerminalOrNonterminal>> reversal =
-				new Function<RegularExpression<TerminalOrNonterminal>, RegularExpression<TerminalOrNonterminal>>() {
+		Function<RegularExpression<TerminalOrNonterminal<Terminal>>, RegularExpression<TerminalOrNonterminal<Terminal>>> reversal =
+				new Function<RegularExpression<TerminalOrNonterminal<Terminal>>, RegularExpression<TerminalOrNonterminal<Terminal>>>() {
 			@Override
-			public RegularExpression<TerminalOrNonterminal> apply(RegularExpression<TerminalOrNonterminal> t) {
+			public RegularExpression<TerminalOrNonterminal<Terminal>> apply(RegularExpression<TerminalOrNonterminal<Terminal>> t) {
 				return RegularExpression.reversal(t);
 			}
 		};
 		
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> m =
+		KleeneMatrix<RegularExpression<TerminalOrNonterminal<Terminal>>> m =
 				mvg.matrix.projectionThroughMorphism(reversal);
 		
 		System.out.println(m);
 		System.out.println(m.close());
 		
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal>> vec = mvg.vector.projectionThroughMorphism(reversal);
+		KleeneMatrix<RegularExpression<TerminalOrNonterminal<Terminal>>> vec = mvg.vector.projectionThroughMorphism(reversal);
 
 		System.out.println(vec);
 		
