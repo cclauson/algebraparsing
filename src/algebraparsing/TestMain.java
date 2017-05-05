@@ -24,6 +24,27 @@ public class TestMain {
 		}
 	};
 
+	private static final TerminalConsolidator<Translation, InputOrOutputTerminal> TC_SSDTS = new TerminalConsolidator<Translation, InputOrOutputTerminal>() {
+		
+		private List<Terminal> inputs = new ArrayList<Terminal>();
+		private List<Terminal> outputs = new ArrayList<Terminal>();
+		
+		@Override
+		public void consolidateTerminal(InputOrOutputTerminal terminal) {
+			List<Terminal> list = terminal.isInput() ? inputs : outputs;
+			list.add(terminal.getTerminal());
+		}
+
+		@Override
+		public RegularExpression<TerminalOrNonterminal<Translation>> asRegexpAndReset() {
+			RegularExpression<TerminalOrNonterminal<Translation>> ret =
+					RegularExpression.fromAtom(TerminalOrNonterminal.fromTerminal(
+							new Translation(inputs, outputs)));
+			inputs = new ArrayList<Terminal>();
+			outputs = new ArrayList<Terminal>();
+			return ret;
+		}
+	};
 	
 	private static TerminalOrNonterminal<Terminal> nonterminal(char c) {
 		return TerminalOrNonterminal.fromNonterminal(new Nonterminal(c));
@@ -35,6 +56,26 @@ public class TestMain {
 
 	private static TerminalOrNonterminal<Terminal> terminal(String s) {
 		return TerminalOrNonterminal.fromTerminal(new Terminal(s));
+	}
+
+	private static TerminalOrNonterminal<InputOrOutputTerminal> nonterminalSDTS(char c) {
+		return TerminalOrNonterminal.fromNonterminal(new Nonterminal(c));
+	}
+
+	private static TerminalOrNonterminal<InputOrOutputTerminal> terminalSDTS(char c) {
+		return TerminalOrNonterminal.fromTerminal(InputOrOutputTerminal.inputTerminal(new Terminal(c)));
+	}
+
+	private static TerminalOrNonterminal<InputOrOutputTerminal> terminalSDTS(String s) {
+		return TerminalOrNonterminal.fromTerminal(InputOrOutputTerminal.inputTerminal(new Terminal(s)));
+	}
+
+	private static TerminalOrNonterminal<InputOrOutputTerminal> outputTerminalSDTS(char c) {
+		return TerminalOrNonterminal.fromTerminal(InputOrOutputTerminal.outputTerminal(new Terminal(c)));
+	}
+
+	private static TerminalOrNonterminal<InputOrOutputTerminal> outputTerminalSDTS(String s) {
+		return TerminalOrNonterminal.fromTerminal(InputOrOutputTerminal.outputTerminal(new Terminal(s)));
 	}
 
 	private static Grammar<Terminal, Terminal> grammar1() {
@@ -232,41 +273,175 @@ public class TestMain {
 		return new Grammar<Terminal, Terminal>(startSymbol, productions, TC);		
 	}
 
+	private static Grammar<InputOrOutputTerminal, Translation> logicExpressionSSDTS() {
+		//For the grammar:
+		// A -> B '$'
+		// B -> 'for all' H B
+		// B -> 'exists' H 'such that' B
+		// B -> C
+		// C -> C iff D
+		// C -> D
+		// D -> 'if' B 'then' D
+		// D -> E 'implies' D
+		// D -> E
+		// E -> E 'or' F
+		// E -> F
+		// F -> F 'and' G
+		// F -> G
+		// G -> not G
+		// G -> H
+		// G -> '(' B ')'
+		// H -> 'sym'
+		
+		Nonterminal startSymbol = new Nonterminal('A');
+		List<Production<InputOrOutputTerminal>> productions = new ArrayList<Production<InputOrOutputTerminal>>();
+		// A -> B '$'
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('A'), Arrays.asList(
+				nonterminalSDTS('B'), terminalSDTS('$')
+			))
+		);
+		// B -> 'for all' H B
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('B'), Arrays.asList(
+				terminalSDTS("for all"), nonterminalSDTS('H'), nonterminalSDTS('B'), outputTerminalSDTS("FORALL")
+			))
+		);
+		// B -> 'exists' H 'such that' B
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('B'), Arrays.asList(
+				terminalSDTS("exists"), nonterminalSDTS('H'),
+				terminalSDTS("such that"), nonterminalSDTS('B'), outputTerminalSDTS("EXISTS")
+			))
+		);
+		// B -> C
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('B'), Arrays.asList(
+				nonterminalSDTS('C')
+			))
+		);
+		// C -> C iff D
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('C'), Arrays.asList(
+				nonterminalSDTS('C'), terminalSDTS("iff"), nonterminalSDTS('D'), outputTerminalSDTS("IFF")
+			))
+		);
+		// C -> D
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('C'), Arrays.asList(
+				nonterminalSDTS('D')
+			))
+		);
+			// D -> 'if' B 'then' D
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('D'), Arrays.asList(
+				terminalSDTS("if"), nonterminalSDTS('B'),
+				terminalSDTS("then"), nonterminalSDTS('D'), outputTerminalSDTS("IMPLIES")
+			))
+		);
+		// D -> E 'implies' D
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('D'), Arrays.asList(
+				nonterminalSDTS('E'), terminalSDTS("implies"), nonterminalSDTS('D'), outputTerminalSDTS("IMPLIES")
+			))
+		);
+		// D -> E
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('D'), Arrays.asList(
+				nonterminalSDTS('E')
+			))
+		);
+		// E -> E 'or' F
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('E'), Arrays.asList(
+				nonterminalSDTS('E'), terminalSDTS("or"), nonterminalSDTS('F'), outputTerminalSDTS("OR")
+			))
+		);
+		// E -> F
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('E'), Arrays.asList(
+				nonterminalSDTS('F')
+			))
+		);
+		// F -> F 'and' G
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('F'), Arrays.asList(
+				nonterminalSDTS('F'), terminalSDTS("and"), nonterminalSDTS('G'), outputTerminalSDTS("AND")
+			))
+		);
+		// F -> G
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('F'), Arrays.asList(
+				nonterminalSDTS('G')
+			))
+		);
+		// G -> not G
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('G'), Arrays.asList(
+				terminalSDTS("not"), nonterminalSDTS('G'), outputTerminalSDTS("NOT")
+			))
+		);
+		// G -> H
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('G'), Arrays.asList(
+				nonterminalSDTS('H')
+			))
+		);
+		// G -> '(' B ')'
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('G'), Arrays.asList(
+				terminalSDTS("("), nonterminalSDTS('B'), terminalSDTS(")")
+			))
+		);
+		// H -> 'sym'
+		productions.add(
+			new Production<InputOrOutputTerminal>(new Nonterminal('H'), Arrays.asList(
+				terminalSDTS("sym"), outputTerminalSDTS("SYM")
+			))
+		);
+		return new Grammar<InputOrOutputTerminal, Translation>(startSymbol, productions, TC_SSDTS);
+	}
+
 	public static void main(String[] args) {
 		
 		//Grammar grammar = grammar2();
-		Grammar<Terminal, Terminal> grammar = logicExpression();
+		//Grammar<Terminal, Terminal> grammar = logicExpression();
+		Grammar<InputOrOutputTerminal, Translation> grammar = logicExpressionSSDTS();
 		System.out.println(grammar.toString());
 		
 		System.out.println();
 		
-		MatrixVectorGrammar<Terminal> mvg = grammar.asAffineEndomorphism();
+		//MatrixVectorGrammar<Terminal> mvg = grammar.asAffineEndomorphism();
+		MatrixVectorGrammar<Translation> mvg = grammar.asAffineEndomorphism();
+		processGrammar(mvg);
+	}
+	
+	private static <T> void processGrammar(MatrixVectorGrammar<T> mvg) {
 		System.out.println(mvg.matrix);
 		System.out.println();
 		System.out.println(mvg.vector);
 		
 		System.out.println();
 		
-		Function<RegularExpression<TerminalOrNonterminal<Terminal>>, RegularExpression<TerminalOrNonterminal<Terminal>>> reversal =
-				new Function<RegularExpression<TerminalOrNonterminal<Terminal>>, RegularExpression<TerminalOrNonterminal<Terminal>>>() {
+		Function<RegularExpression<TerminalOrNonterminal<T>>, RegularExpression<TerminalOrNonterminal<T>>> reversal =
+				new Function<RegularExpression<TerminalOrNonterminal<T>>, RegularExpression<TerminalOrNonterminal<T>>>() {
 			@Override
-			public RegularExpression<TerminalOrNonterminal<Terminal>> apply(RegularExpression<TerminalOrNonterminal<Terminal>> t) {
+			public RegularExpression<TerminalOrNonterminal<T>> apply(RegularExpression<TerminalOrNonterminal<T>> t) {
 				return RegularExpression.reversal(t);
 			}
 		};
 		
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal<Terminal>>> m =
+		KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> m =
 				mvg.matrix.projectionThroughMorphism(reversal);
 		
 		System.out.println(m);
 		System.out.println(m.close());
 		
-		KleeneMatrix<RegularExpression<TerminalOrNonterminal<Terminal>>> vec = mvg.vector.projectionThroughMorphism(reversal);
+		KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> vec = mvg.vector.projectionThroughMorphism(reversal);
 
 		System.out.println(vec);
 		
 		System.out.println(m.close().mul(vec));
-
 	}
 	
 	private static void test2x2() {
