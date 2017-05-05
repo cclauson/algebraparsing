@@ -413,10 +413,14 @@ public class TestMain {
 		
 		//MatrixVectorGrammar<Terminal> mvg = grammar.asAffineEndomorphism();
 		MatrixVectorGrammar<Translation> mvg = grammar.asAffineEndomorphism();
-		processGrammar(mvg);
+		Map<Nonterminal, RegularExpression<TerminalOrNonterminal<Translation>>> nonterminalExpansions =
+				processGrammar(mvg);
+		
+		
 	}
 	
-	private static <T> void processGrammar(MatrixVectorGrammar<T> mvg) {
+	private static <T> Map<Nonterminal, RegularExpression<TerminalOrNonterminal<T>>> 
+			processGrammar(MatrixVectorGrammar<T> mvg) {
 		System.out.println(mvg.matrix);
 		System.out.println();
 		System.out.println(mvg.vector);
@@ -440,8 +444,43 @@ public class TestMain {
 		KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> vec = mvg.vector.projectionThroughMorphism(reversal);
 
 		System.out.println(vec);
+		vec = m.close().mul(vec);
 		
-		System.out.println(m.close().mul(vec));
+		Map<Nonterminal, RegularExpression<TerminalOrNonterminal<T>>> nonterminalExpansions =
+				new HashMap<Nonterminal, RegularExpression<TerminalOrNonterminal<T>>>();
+		
+		for (Map.Entry<Nonterminal, Integer> entry : mvg.nonterminalIndexMap.entrySet()) {
+			nonterminalExpansions.put(entry.getKey(), vec.getAt(entry.getValue(), 0));
+		}
+		
+		//enumerateStates(initialNonterminal, nonterminalExpansions);
+		
+		System.out.println(nonterminalExpansions);
+		
+		return nonterminalExpansions;
+	}
+	
+	public static void enumerateStates(
+			Nonterminal initialNonterminal,
+			Map<Nonterminal, RegularExpression<TerminalOrNonterminal<Translation>>> nonterminalExpansions) {
+		
+		Set<RegularExpression<TerminalOrNonterminal<Translation>>> visited =
+				new HashSet<RegularExpression<TerminalOrNonterminal<Translation>>>();
+		Stack<RegularExpression<TerminalOrNonterminal<Translation>>> stack =
+				new Stack<RegularExpression<TerminalOrNonterminal<Translation>>>();
+		
+		RegularExpression<TerminalOrNonterminal<Translation>> initial = RegularExpression.fromAtom(TerminalOrNonterminal.fromNonterminal(initialNonterminal));
+
+		visited.add(initial);
+		stack.push(initial);
+		
+		while (!stack.isEmpty()) {
+			RegularExpression<TerminalOrNonterminal<Translation>> cur = stack.pop();
+			DecomposedRegexp<TerminalOrNonterminal<Translation>> decomp = cur.decompose();
+
+			//TODO: Finish this
+			
+		}
 	}
 	
 	private static void test2x2() {

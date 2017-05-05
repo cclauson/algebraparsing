@@ -15,6 +15,10 @@ public class Grammar<T, S> {
 		public RegularExpression<TerminalOrNonterminal<S>> asRegexpAndReset();
 	}
 	
+	public Nonterminal startSymbol() {
+		return startSymbol;
+	}
+	
 	public Grammar(Nonterminal startSymbol, List<Production<T>> productions, TerminalConsolidator<S, T> tc) {
 		if (startSymbol == null)
 			throw new RuntimeException("start symbol must not be null");
@@ -64,7 +68,7 @@ public class Grammar<T, S> {
 	}
 	
 	public MatrixVectorGrammar<S> asAffineEndomorphism() {
-				
+		
 		final Map<Nonterminal, Integer> nonterminalIndexMap = new HashMap<Nonterminal, Integer>();
 		nonterminalIndexMap.put(startSymbol, 0);
 		int numNonterminals = 1;
