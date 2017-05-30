@@ -1,8 +1,11 @@
 package algebraparsing;
 
-import static algebraparsing.RegularExpression.*;
+import static algebraparsing.KleeneAlgebra.RegularExpression.*;
 
 import java.util.*;
+
+import algebraparsing.KleeneAlgebra.KleeneMatrix;
+import algebraparsing.KleeneAlgebra.RegularExpression;
 
 public class Grammar<T, S> {
 

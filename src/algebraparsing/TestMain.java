@@ -4,6 +4,9 @@ import java.util.*;
 import java.util.function.Function;
 
 import algebraparsing.Grammar.TerminalConsolidator;
+import algebraparsing.KleeneAlgebra.DecomposedRegexp;
+import algebraparsing.KleeneAlgebra.KleeneMatrix;
+import algebraparsing.KleeneAlgebra.RegularExpression;
 
 public class TestMain {
 
@@ -273,7 +276,7 @@ public class TestMain {
 		return new Grammar<Terminal, Terminal>(startSymbol, productions, TC);		
 	}
 
-	private static Grammar<InputOrOutputTerminal, Translation> logicExpressionSSDTS() {
+	public static Grammar<InputOrOutputTerminal, Translation> logicExpressionSSDTS() {
 		//For the grammar:
 		// A -> B '$'
 		// B -> 'for all' H B
@@ -477,9 +480,47 @@ public class TestMain {
 		while (!stack.isEmpty()) {
 			RegularExpression<TerminalOrNonterminal<Translation>> cur = stack.pop();
 			DecomposedRegexp<TerminalOrNonterminal<Translation>> decomp = cur.decompose();
-
-			//TODO: Finish this
 			
+			if (decomp.hasEmptyString()) {
+				// this is where we would pop the stack, don't handle this case right now
+				continue;
+			}
+			
+			Map<Terminal, RegularExpression<TerminalOrNonterminal<Translation>>> transitionMap =
+					new HashMap<Terminal, RegularExpression<TerminalOrNonterminal<Translation>>>();
+			
+			for (Map.Entry<TerminalOrNonterminal<Translation>, RegularExpression<TerminalOrNonterminal<Translation>>>
+					entry : decomp.nonemptyTerms().entrySet()) {
+				TerminalOrNonterminal<Translation> keyOrig = entry.getKey();
+				RegularExpression<TerminalOrNonterminal<Translation>> valueOrig = entry.getValue();
+				
+				Terminal keyNew;
+				RegularExpression<TerminalOrNonterminal<Translation>> valueNew;
+				if (keyOrig.isTerminal()) {
+					Translation translation = keyOrig.asTerminal();
+					if (translation.noInput())
+						throw new RuntimeException("this case not currently handled");
+					
+					keyNew = translation.head();
+					Translation tail = translation.tail();
+					
+					if (tail.noInput()) {
+						valueNew = valueOrig;
+					} else {
+						valueNew = RegularExpression.fromAtom(TerminalOrNonterminal
+								.fromTerminal(tail)).mul(valueOrig);
+					}
+				} else {
+					Nonterminal nonterminal = keyOrig.asNonterminal();
+					
+					// for now, we'll assume that this is a case where we push onto the
+					// stack, but don't actually handle it right now
+					
+					
+					
+					
+				}
+			}
 		}
 	}
 	

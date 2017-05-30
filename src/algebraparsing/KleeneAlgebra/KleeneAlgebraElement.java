@@ -1,4 +1,4 @@
-package algebraparsing;
+package algebraparsing.KleeneAlgebra;
 
 public interface KleeneAlgebraElement<T extends KleeneAlgebraElement<T>> {
 	public T add(T el);

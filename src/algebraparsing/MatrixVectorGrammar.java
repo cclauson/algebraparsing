@@ -2,6 +2,9 @@ package algebraparsing;
 
 import java.util.Map;
 
+import algebraparsing.KleeneAlgebra.KleeneMatrix;
+import algebraparsing.KleeneAlgebra.RegularExpression;
+
 public class MatrixVectorGrammar<T> {
 	public final Map<Nonterminal, Integer> nonterminalIndexMap;
 	public final KleeneMatrix<RegularExpression<TerminalOrNonterminal<T>>> matrix;

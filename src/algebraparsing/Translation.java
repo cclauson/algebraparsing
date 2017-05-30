@@ -23,6 +23,24 @@ public class Translation {
 		return outputs;
 	}
 	
+	public boolean noInput() {
+		return this.inputs.isEmpty();
+	}
+	
+	public Terminal head() {
+		if (this.inputs.isEmpty())
+			throw new RuntimeException("no input terminals");
+
+		return inputs.get(0);
+	}
+	
+	public Translation tail() {
+		if (this.inputs.isEmpty())
+			throw new RuntimeException("no input terminals");
+		
+		return new Translation(inputs.subList(1, inputs.size()), outputs);
+	}
+	
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		for (Terminal terminal : inputs) {

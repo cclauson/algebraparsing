@@ -1,4 +1,4 @@
-package algebraparsing;
+package algebraparsing.KleeneAlgebra;
 
 import java.util.*;
 

@@ -1,4 +1,4 @@
-package algebraparsing;
+package algebraparsing.KleeneAlgebra;
 
 import java.util.*;
 import java.util.function.*;
@@ -119,6 +119,7 @@ public class KleeneMatrix<T extends KleeneAlgebraElement<T>>
 			//actually it's possible we should have only allowed square matrices but anyways
 			throw new RuntimeException("can only close square matrices");
 		}
+		
 		//clone matrix
 		final KleeneMatrix<T> left = this.createClone();
 		final KleeneMatrix<T> right = this.createIdentity();
@@ -136,6 +137,7 @@ public class KleeneMatrix<T extends KleeneAlgebraElement<T>>
 				right.addLeftScaledRowToRow(k, otherFactor, i);
 			}
 		}
+		
 		//back substitution
 		for (int j = n - 1; j >= 0; --j) {
 			for (int i = j - 1; i >= 0; --i) {
